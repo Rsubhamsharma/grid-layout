@@ -2,7 +2,6 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-  
 }
 
 html,
@@ -10,40 +9,58 @@ body {
     height: 100%;
     width: 100%;
 }
+
 .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-   
-    
     width: 100%;
     min-height: 100vh;
+    gap: 0;
 }
+
 .text {
-  display: flex;
+    display: flex;
     flex-direction: column;
     margin: auto;
 }
 
-
 .card {
-       display: flex;
-      position: relative;
-   
-
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.card:nth-child(1) {background-color: rgb(83, 197, 83); }
-.card:nth-child(2) {background-color: rgb(219, 158, 51);}
-.card:nth-child(3) {background-color: rgb(88, 110, 220); }
-.card:nth-child(4) { background-color: rgb(220, 120, 80); }
-.card:nth-child(5) {background-color: rgb(225, 73, 88); }
-.card:nth-child(6) {background-color: rgb(28, 174, 194); }
+.card:nth-child(1) {
+    background-color: rgb(83, 197, 83);
+}
 
+.card:nth-child(2) {
+    background-color: rgb(219, 158, 51);
+}
+
+.card:nth-child(3) {
+    background-color: rgb(88, 110, 220);
+}
+
+.card:nth-child(4) {
+    background-color: rgb(220, 120, 80);
+}
+
+.card:nth-child(5) {
+    background-color: rgb(225, 73, 88);
+}
+
+.card:nth-child(6) {
+    background-color: rgb(28, 174, 194);
+}
 
 .logo {
-    left: 10%;
-    top: 20%;
     position: absolute;
+    top: 20%;
+    left: 10%;
+    transform: none;
 }
 
 h2 {
@@ -52,28 +69,166 @@ h2 {
     text-align: center;
     color: white;
 }
+
 p {
     font-size: 0.95rem;
     text-align: center;
     color: rgba(255, 255, 255, 0.9);
     margin-top: 10px;
-    
 }
 
+hr {
+    width: 80%;
+
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
 
 .image {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     margin-right: 10px;
+    width: auto;
 }
-@media (max-width: 800px) {
+
+.image img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+@media (max-width: 992px) {
     .grid {
         grid-template-columns: repeat(2, 1fr);
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+    }
+
+    .card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        height: 100vh;
+        width: 50vw;
+        padding: 40px;
+    }
+
+    .text-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+    }
+
+    .logo {
+        margin-bottom: 20px;
+        position: static;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1rem;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 1;
+    }
+
+    .image img {
+        height: auto;
+        width: 100%;
+        max-width: 250px;
+        max-height: 60vh;
+        object-fit: contain;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
     .grid {
-        grid-template-columns: 1fr
-    };}
+        grid-template-columns: 1fr;
+        min-height: auto;
+        overflow-y: scroll;
+    }
+
+    .card {
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        padding: 40px 20px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    h2 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1.8rem;
+        margin-top: 12px;
+        text-align: center;
+    }
+
+
+
+    .text {
+        width: 100%;
+        text-align: center;
+
+    }
+
+    .image {
+
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+        height: 50%;
+    }
+
+    .logo {
+        height: 10%;
+        width: 20%;
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .image img {
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+    }
+}
