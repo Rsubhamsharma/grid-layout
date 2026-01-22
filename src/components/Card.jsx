@@ -1,30 +1,22 @@
 import React from 'react'
 
-function Card({ id, heading, text, onEdit, onDelete, logoUrl, imageUrl }) {
+function Card({ heading, text, color, logoUrl, imageUrl }) {
 
 
   return (
-    <div className="card">
+    <div className="card" style={{ backgroundColor: color }}>
       <div className="text-container">
-        <img src={logoUrl} alt={heading} className="logo" height="60" width="60" />
+        <img src={logoUrl} alt={heading} className="logo" />
         <div className="text text-content">
-          <h2>{heading} <br /></h2>
+          <h2>{heading} </h2>
           <hr />
           <p>{text}</p>
         </div>
       </div>
       <div className="image">
-        <img src={imageUrl} alt={heading} height="100%" width="60%" />
+        <img src={imageUrl} alt={heading} />
       </div>
-      <div className='buttons'>
-        <button className='edit-btn' onClick={() => {
-          onEdit(id)
-        }}>Edit
-        </button>
-        <button className='delete-btn' onClick={() => { onDelete(id) }}>Delete
 
-        </button>
-      </div>
     </div>
   )
 }

@@ -1,25 +1,32 @@
 import axios from 'axios'
-import React, { use } from 'react'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import './AdminPage.css'
 
-
 function AdminPage() {
+
   const { id } = useParams()
+  const API_URL = 'http://localhost:3000/features'
+
   const [cards, setCards] = useState([])
+
   const [title, setTitle] = useState('')
-  const [editingId, setEditingId] = useState(null)
   const [description, setDescription] = useState('')
   const [logo, setLogo] = useState('')
+  const [logoName, setLogoName] = useState('')
   const [image, setImage] = useState('')
+  const [imageName, setImageName] = useState('')
+  const [color, setColor] = useState('')
+  const [active, setActive] = useState(true)
 
+  const [addCard, setAddCard] = useState(false)
+  const [editingId, setEditingId] = useState(null)
 
-  const fetchCards = () => {
-    axios.get('http://localhost:3000/features')
-      .then(datas => setCards(datas.data))
-
+  const fetchCards = async () => {
+    const res = await axios.get(API_URL)
+    setCards(res.data)
   }
+
   useEffect(() => {
     fetchCards()
   }, [])
@@ -27,108 +34,250 @@ function AdminPage() {
   useEffect(() => {
     if (id && cards.length > 0) {
       const card = cards.find(c => String(c.id) === String(id))
-
-      if (card) {
-        setTitle(card.title)
-        setDescription(card.description)
-        setLogo(card.logo)
-        setImage(card.image)
-        setEditingId(String(card.id))
-      }
+      if (card) fillForm(card)
     }
   }, [id, cards])
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    // Data now contains the Base64 strings for logo and image if they were updated
-    const data = { title, description, logo, image }
-    try {
-      if (editingId) {
 
-        await axios.put(`http://localhost:3000/features/${editingId}`, data)
-        setTitle('')
-        setDescription('')
-        setLogo('')
-        setImage('')
-        setEditingId(null)
-      }
-      else {
-
-        await axios.post('http://localhost:3000/features', data)
-        setTitle('')
-        setDescription('')
-        setLogo('')
-        setImage('')
-      }
-      fetchCards()
-
-    } catch (error) {
-      console.log('Error submitting form:', error.message)
-      if (error.response && error.response.status === 404) {
-        console.log(error.message)
-      }
-    }
-  }
-
-  const handleFileChange = (e, setFunction) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFunction(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-  const handleEdit = async (card) => {
-
+  const fillForm = (card) => {
     setTitle(card.title)
     setDescription(card.description)
     setLogo(card.logo)
+    setLogoName(card.logoName || '')
     setImage(card.image)
-    setEditingId(String(card.id))
+    setImageName(card.imageName || '')
+    setColor(card.color)
+    setActive(card.active !== false)
+    setEditingId(card.id)
+    setAddCard(true)
+  }
+
+  const resetForm = () => {
+    setTitle('')
+    setDescription('')
+    setLogo('')
+    setLogoName('')
+    setImage('')
+    setImageName('')
+    setColor('')
+    setActive(true)
+    setEditingId(null)
+    setAddCard(false)
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    if (!title || !description) {
+
+      return
+    }
+
+    const data = {
+      title,
+      description,
+      logo,
+      logoName,
+      image,
+      imageName,
+      color,
+      active
+    }
+
+    try {
+      if (editingId) {
+        await axios.put(`${API_URL}/${editingId}`, data)
+      } else {
+        await axios.post(API_URL, data)
+      }
+
+      resetForm()
+      fetchCards()
+
+    } catch (error) {
+      console.log('Submit error:', error.message)
+    }
+  }
+
+  const handleFileChange = (e, setValue, setName) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setName(file.name)
+    const reader = new FileReader()
+    reader.onloadend = () => setValue(reader.result)
+    reader.readAsDataURL(file)
+  }
+
+  const handleCardChange = (id, field, value) => {
+    setCards(prev =>
+      prev.map(card =>
+        card.id === id ? { ...card, [field]: value } : card
+      )
+    )
+  }
+
+  const handleCardImageChange = (e, id, field) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setCards(prev =>
+        prev.map(card =>
+          card.id === id
+            ? { ...card, [field]: reader.result, [`${field}Name`]: file.name }
+            : card
+        )
+      )
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleSave = async (card) => {
+    try {
+      await axios.put(`${API_URL}/${card.id}`, card)
+      fetchCards()
+    } catch (error) {
+      console.log('Save error:', error.message)
+    }
   }
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/features/${id}`)
+      await axios.delete(`${API_URL}/${id}`)
       fetchCards()
+      if (editingId === id) resetForm()
     } catch (error) {
-      console.log(error.message)
+      console.log('Delete error:', error.message)
     }
   }
 
-
   return (
-    <div className='admin-container'>
+    <>
 
-      <form onSubmit={handleSubmit} className='form'>
-        <h2 className='heading'>{editingId ? 'Edit Card' : 'Add New Card'}</h2>
+      <div className='nav'>
+        <h1 className='heading'>All Cards</h1>
+        <button
+          className='add-button'
+          onClick={() => setAddCard(prev => !prev)}
+        >
+          {addCard ? 'Close Form' : 'Add a Card'}
+        </button>
+      </div>
 
-        <div className='logo-image' >
+      <div className='container'>
 
-          <label>Logo Image:</label>
-          <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, setLogo)} />
+        {cards.map((card, index) => (
+          <div key={card.id} className='admin-container'>
 
-        </div>
+            <h3>Card {index + 1}</h3>
 
-        <input type='text' placeholder='Enter title' value={title} onChange={(e) => setTitle(e.target.value)} />
-        <input type="text" placeholder='Enter Description ' value={description}
-          onChange={(e) => setDescription(e.target.value)} />
+            <form className='form' onSubmit={(e) => e.preventDefault()}>
 
-        <div className='main-image'>
-          <label >Main Image:</label>
-          <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, setImage)} />
+              <input type="file" accept="image/*"
+                onChange={(e) => handleCardImageChange(e, card.id, 'logo')} />
 
-        </div>
+              <input
+                type='text'
+                value={card.title}
+                onChange={(e) => handleCardChange(card.id, 'title', e.target.value)}
+              />
 
-        <button type="submit">{editingId ? 'Update' : 'Add'}</button>
-      </form>
-      <hr />
-      <div className="card-list">
+              <input
+                type="text"
+                value={card.description}
+                onChange={(e) => handleCardChange(card.id, 'description', e.target.value)}
+              />
 
+              <input
+                type="color"
+                value={card.color}
+                onChange={(e) => handleCardChange(card.id, 'color', e.target.value)}
+              />
+
+              <div className='active-checkbox'>
+                <label>Active:</label>
+                <input
+                  type="checkbox"
+                  checked={card.active !== false}
+                  onChange={(e) => {
+                    const newValue = e.target.checked;
+                    // Instant Save
+                    axios.put(`${API_URL}/${card.id}`, { ...card, active: newValue })
+                      .then(() => fetchCards())
+                  }}
+                />
+              </div>
+
+              <input type="file" accept="image/*"
+                onChange={(e) => handleCardImageChange(e, card.id, 'image')} />
+
+            </form>
+
+            <div className='actions'>
+              <button onClick={() => handleDelete(card.id)}>Delete</button>
+            </div>
+
+          </div>
+        ))}
+
+        {addCard && (
+          <div className='admin-container add-card-inline'>
+
+            <h3>{editingId ? 'Update Card' : 'New Card'}</h3>
+
+            <form onSubmit={handleSubmit} className='form'>
+
+              <input type="file" accept="image/*"
+                onChange={(e) => handleFileChange(e, setLogo, setLogoName)} />
+
+              <input
+                type='text'
+                placeholder='Enter title'
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder='Enter description'
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+              />
+
+              <input type="file" accept="image/*"
+                onChange={(e) => handleFileChange(e, setImage, setImageName)} />
+
+              <div className="inline-actions">
+                <button type="submit">
+                  {editingId ? 'Update' : 'Add'}
+                </button>
+                {/* <button type="button" onClick={resetForm}>
+                  Cancel
+                </button> */}
+              </div>
+
+            </form>
+          </div>
+        )}
 
       </div>
-    </div>
+
+      <div className='save-btn'>
+        <button className="saveBtn" onClick={() => {
+          cards.forEach(card => handleSave(card))
+        }}>
+          Save
+        </button>
+      </div>
+
+    </>
   )
 }
 
