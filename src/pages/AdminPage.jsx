@@ -1,15 +1,13 @@
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+
 import './AdminPage.css'
 
 function AdminPage() {
 
-  const { id } = useParams()
-  const API_URL = 'http://localhost:3000/features'
 
+  const API_URL = 'http://192.168.1.92:3000/features'
   const [cards, setCards] = useState([])
-
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [logo, setLogo] = useState('')
@@ -18,9 +16,8 @@ function AdminPage() {
   const [imageName, setImageName] = useState('')
   const [color, setColor] = useState('')
   const [active, setActive] = useState(true)
-
   const [addCard, setAddCard] = useState(false)
-  const [editingId, setEditingId] = useState(null)
+  const [editingId, setEditingId] = useState('')
 
   const fetchCards = async () => {
     const res = await axios.get(API_URL)
@@ -31,26 +28,6 @@ function AdminPage() {
     fetchCards()
   }, [])
 
-  useEffect(() => {
-    if (id && cards.length > 0) {
-      const card = cards.find(c => String(c.id) === String(id))
-      if (card) fillForm(card)
-    }
-  }, [id, cards])
-
-  const fillForm = (card) => {
-    setTitle(card.title)
-    setDescription(card.description)
-    setLogo(card.logo)
-    setLogoName(card.logoName || '')
-    setImage(card.image)
-    setImageName(card.imageName || '')
-    setColor(card.color)
-    setActive(card.active !== false)
-    setEditingId(card.id)
-    setAddCard(true)
-  }
-
   const resetForm = () => {
     setTitle('')
     setDescription('')
@@ -60,18 +37,12 @@ function AdminPage() {
     setImageName('')
     setColor('')
     setActive(true)
-    setEditingId(null)
+    setEditingId('')
     setAddCard(false)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    if (!title || !description) {
-
-      return
-    }
-
     const data = {
       title,
       description,
@@ -84,12 +55,8 @@ function AdminPage() {
     }
 
     try {
-      if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, data)
-      } else {
-        await axios.post(API_URL, data)
-      }
 
+      await axios.post(API_URL, data)
       resetForm()
       fetchCards()
 
@@ -97,6 +64,7 @@ function AdminPage() {
       console.log('Submit error:', error.message)
     }
   }
+
 
   const handleFileChange = (e, setValue, setName) => {
     const file = e.target.files[0]
@@ -127,11 +95,9 @@ function AdminPage() {
           ? { ...card, [field]: reader.result, [`${field}Name`]: file.name }
           : card
       )
-
     }
     reader.readAsDataURL(file)
   }
-
   const handleSave = async (card) => {
     try {
       await axios.put(`${API_URL}/${card.id}`, card)
@@ -153,7 +119,6 @@ function AdminPage() {
 
   return (
     <>
-
       <div className='nav'>
         <h1 className='heading'>All Cards</h1>
         <button
@@ -202,7 +167,7 @@ function AdminPage() {
                   checked={card.active !== false}
                   onChange={(e) => {
                     const newValue = e.target.checked;
-                    // Instant Save
+
                     axios.put(`${API_URL}/${card.id}`, { ...card, active: newValue })
                       .then(() => fetchCards())
                   }}
@@ -225,7 +190,7 @@ function AdminPage() {
         {addCard && (
           <div className='admin-container add-card-inline'>
 
-            <h3>{editingId ? 'Update Card' : 'New Card'}</h3>
+            <h3>New Card</h3>
 
             <form onSubmit={handleSubmit} className='form'>
 
@@ -257,7 +222,7 @@ function AdminPage() {
 
               <div className="inline-actions">
                 <button type="submit">
-                  {editingId ? 'Update' : 'Add'}
+                  Add
                 </button>
                 {/* <button type="button" onClick={resetForm}>
                   Cancel

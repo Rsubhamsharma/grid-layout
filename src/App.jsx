@@ -1,30 +1,25 @@
 import { useEffect, useState } from 'react'
 import Card from './components/Card'
 import './App.css'
-import { useNavigate } from 'react-router-dom'
+
 import axios from 'axios'
 
 function App() {
   const [cards, setCards] = useState([])
-  const navigate = useNavigate()
+
 
   const fetchCards = () => {
-    axios.get('http://localhost:3000/features')
+    axios.get('http://192.168.1.92:3000/features')
       .then(datas => setCards(datas.data))
   }
 
   useEffect(() => {
     fetchCards()
-    // const interval = setInterval(fetchCards, 1000)
-    // return () => clearInterval(interval)
+
   }, [])
 
-  const handleEdit = (id) => navigate(`/admin/${id}`)
 
-  const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:3000/features/${id}`)
-    fetchCards()
-  }
+
 
   return (
     <>
@@ -37,8 +32,6 @@ function App() {
             text={data.description}
             imageUrl={data.image}
             id={data.id}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
             color={data.color}
           />
         })}
