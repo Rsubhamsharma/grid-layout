@@ -122,13 +122,12 @@ function AdminPage() {
 
     const reader = new FileReader()
     reader.onloadend = () => {
-      setCards(prev =>
-        prev.map(card =>
-          card.id === id
-            ? { ...card, [field]: reader.result, [`${field}Name`]: file.name }
-            : card
-        )
+      setCards(card =>
+        card.id === id
+          ? { ...card, [field]: reader.result, [`${field}Name`]: file.name }
+          : card
       )
+
     }
     reader.readAsDataURL(file)
   }
@@ -173,6 +172,7 @@ function AdminPage() {
             <h3>Card {index + 1}</h3>
 
             <form className='form' onSubmit={(e) => e.preventDefault()}>
+              <p className='image-name'> Selected Image : {card.logoName}</p>
 
               <input type="file" accept="image/*"
                 onChange={(e) => handleCardImageChange(e, card.id, 'logo')} />
@@ -211,6 +211,7 @@ function AdminPage() {
 
               <input type="file" accept="image/*"
                 onChange={(e) => handleCardImageChange(e, card.id, 'image')} />
+              <p className='image-name'>Selected Image : {card.imageName}</p>
 
             </form>
 

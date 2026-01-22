@@ -5,6 +5,17 @@
     box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+    width: 100%;
+    height: auto !important;
+    min-height: 100%;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+}
+
+
 
 .admin-container {
     width: 300px;
@@ -16,6 +27,11 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+.image-name {
+    color: black;
+
 }
 
 .form {
@@ -43,6 +59,7 @@ input[type="file"] {
     padding: 10px 0;
     font-size: 14px;
     cursor: pointer;
+    margin-bottom: 0;
 }
 
 input:focus {
@@ -181,6 +198,10 @@ label {
     gap: 20px;
     justify-content: flex-start;
     padding: 20px;
+    /* ADD THESE */
+    width: 100%;
+    min-height: 100vh;
+    overflow-y: auto;
 }
 
 .active-checkbox {
@@ -213,4 +234,39 @@ label {
         max-width: none;
     }
 
+}
+
+@media (max-width: 640px) {
+    body {
+        overflow-y: auto;
+    }
+
+    .container {
+        flex-direction: column;
+        overflow-y: auto;
+        padding-bottom: 120px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* space for bottom save button */
+    }
+
+    .admin-container {
+        width: 100%;
+    }
+
+    .save-btn {
+        position: fixed;
+        bottom: 10px;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        background: white;
+        padding: 10px 0;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .saveBtn {
+        width: 90%;
+    }
 }
