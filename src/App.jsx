@@ -39,9 +39,3 @@ function App() {
 export default App
 
 
-// setCards(prev => prev.filter(card => card.id !== id))
-// const res = await axios.put(`${API_URL}/${card.id}`, card)
-
-//     setCards(prev =>
-//       prev.map(c => c.id === card.id ? res.data : c)
-//     )
