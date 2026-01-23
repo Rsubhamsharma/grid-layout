@@ -49,7 +49,8 @@ function AdminPage() {
     try {
       await axios.post(API_URL, formData)
       resetForm()
-      fetchCards()
+
+      setCards(prev => [...prev, formData])
     }
     catch (error) {
       console.log('Submit error:', error.message)
@@ -96,8 +97,9 @@ function AdminPage() {
   const handleSave = async (card) => {
     try {
       const res = await axios.put(`${API_URL}/${card.id}`, card)
+      setCards((prev) => prev.map(c => c.id === card.id ? res.data : c))
       setEditCardId(null)
-      fetchCards()
+      console.log(res.data)
     } catch (error) {
       console.log('Save error:', error.message)
     }
@@ -106,9 +108,8 @@ function AdminPage() {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`)
-      fetchCards()
-
-
+      setCards((prev) => prev.filter(card => card.id !== id))
+      console.log(cards)
     } catch (error) {
       console.log('Delete error:', error.message)
     }
@@ -165,7 +166,7 @@ function AdminPage() {
                   onChange={(e) => {
                     const newValue = e.target.checked;
                     axios.put(`${API_URL}/${card.id}`, { ...card, active: newValue })
-                      .then(() => fetchCards())
+                      .then(() => setCards(prev => prev.map(c => c.id === card.id ? { ...c, active: newValue } : c)))
                   }}
                 />
               </div>
