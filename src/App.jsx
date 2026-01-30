@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import Card from './components/Card'
 import './App.css'
+import { useQueryClient,useQuery } from '@tanstack/react-query'
 
 import axios from 'axios'
 
 function App() {
   const [cards, setCards] = useState([])
-
+  // const queryClient = useQueryClient()
 
   const fetchCards = () => {
-    axios.get('http://192.168.1.92:3000/features')
+    axios.get('http://localhost:3000/features')
       .then(datas => setCards(datas.data))
   }
-
+  // const {data ,is} = useQuery({queryKey:['Cards'],queryFn:fetchCards()})
   useEffect(() => {
     fetchCards();
 

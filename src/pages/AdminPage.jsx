@@ -32,6 +32,7 @@ function AdminPage() {
 
   const resetForm = () => {
     setFormData({
+    
       title: "",
       description: "",
       logo: "",
@@ -47,9 +48,8 @@ function AdminPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await axios.post(API_URL, formData)
+      await axios.post(API_URL, newCard)
       resetForm()
-
       setCards(prev => [...prev, formData])
     }
     catch (error) {
@@ -57,35 +57,24 @@ function AdminPage() {
     }
   }
 
-
-  const handleFileChange = (e, field, nameField) => {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onloadend = () =>
-      setFormData((prev) => ({ ...prev, [field]: reader.result, [nameField]: file.name }))
-    reader.readAsDataURL(file)
-  }
-
-  const handleCardChange = (id, field, value) => {
+const handleCardChange = (id, field, value) => {
     setEditCardId(id)
     setCards(prev =>
-      prev.map(card =>
-        card.id === id ? { ...card, [field]: value } : card
+      prev.map((card,index) =>
+        (card.id === id || !card.id ===id )? { ...card, [field]: value } : card
       )
     )
   }
 
-  const handleCardImageChange = (e, id, field) => {
-
+  const handleCardImageChange = (e, id, field, index) => {
     const file = e.target.files[0]
     if (!file) return
     setEditCardId(id)
     const reader = new FileReader()
     reader.onloadend = () => {
       setCards(prev =>
-        prev.map(card =>
-          card.id === id
+        prev.map((card) =>
+          (card.id === id || (!card.id ))
             ? { ...card, [field]: reader.result, [`${field}Name`]: file.name }
             : card
         )
@@ -99,7 +88,7 @@ function AdminPage() {
       const res = await axios.put(`${API_URL}/${card.id}`, card)
       setCards((prev) => prev.map(c => c.id === card.id ? res.data : c))
       setEditCardId(null)
-      console.log(res.data)
+    
     } catch (error) {
       console.log('Save error:', error.message)
     }
@@ -109,11 +98,46 @@ function AdminPage() {
     try {
       await axios.delete(`${API_URL}/${id}`)
       setCards((prev) => prev.filter(card => card.id !== id))
-      console.log(cards)
+     
     } catch (error) {
       console.log('Delete error:', error.message)
     }
   }
+const handleAdd = () => {
+  if (!addCard) {
+    setAddCard(true)
+    const emptyCard = {
+      title: "",
+      description: "",
+      logo: "",
+      color: "",
+      image: "",
+      active: true,
+      logoName: "",
+      imageName: ""
+    }
+   
+    setCards((prev) => [...prev, emptyCard])
+ 
+  } else {
+    setCards((prev) => prev.filter(card => card.id !== undefined && card.id !== null))
+    setAddCard(false)
+    resetForm()
+  }
+}
+
+const handleAddCard = async (newCard) => {
+  try {
+    const res = await axios.post(`${API_URL}`, newCard)
+    
+    setAddCard(false)
+    setCards(prev => prev.map (card => !card.id ? res.data : card))
+    resetForm()
+   
+  } catch (error) {
+    console.log('Add error:', error.message)
+  }
+}
 
   return (
     <>
@@ -121,7 +145,7 @@ function AdminPage() {
         <h1 className='heading'>All Cards</h1>
         <button
           className='add-button'
-          onClick={() => setAddCard(prev => !prev)}
+          onClick={handleAdd}
         >
           {addCard ? 'Close Form' : 'Add a Card'}
         </button>
@@ -131,31 +155,30 @@ function AdminPage() {
 
         {cards.map((card, index) => (
           <div key={card.id} className='admin-container'>
-
             <h3>Card {index + 1}</h3>
 
-            <form className='form' onSubmit={handleSubmit}>
+            <form className='form'onSubmit={handleSubmit}>
               <p className='image-name'> Selected Image : {card.logoName}</p>
 
               <input type="file" accept="image/*"
-                onChange={(e) => handleCardImageChange(e, card.id, "logo")} />
+                onChange={(e) => handleCardImageChange(e, card.id, "logo", index)} />
 
               <input
                 type='text'
                 value={card.title}
-                onChange={(e) => handleCardChange(card.id, "title", e.target.value)}
+                onChange={(e) => handleCardChange(card.id || index, "title", e.target.value)}
               />
 
               <input
                 type="text"
                 value={card.description}
-                onChange={(e) => handleCardChange(card.id, "description", e.target.value)}
+                onChange={(e) => handleCardChange(card.id || index, "description", e.target.value)}
               />
 
               <input
                 type="color"
                 value={card.color}
-                onChange={(e) => handleCardChange(card.id, "color", e.target.value)}
+                onChange={(e) => handleCardChange(card.id || index, "color", e.target.value)}
               />
 
               <div className='active-checkbox'>
@@ -165,71 +188,33 @@ function AdminPage() {
                   checked={card.active !== false}
                   onChange={(e) => {
                     const newValue = e.target.checked;
-                    axios.put(`${API_URL}/${card.id}`, { ...card, active: newValue })
-                      .then(() => setCards(prev => prev.map(c => c.id === card.id ? { ...c, active: newValue } : c)))
+                    if (card.id) {
+                      axios.put(`${API_URL}/${card.id}`, { ...card, active: newValue })
+                        .then(() => setCards(prev => prev.map(c => c.id === card.id ? { ...c, active: newValue } : c)))
+                    } else {
+                      handleCardChange(card.id || index, "active", newValue)
+                    }
                   }}
                 />
               </div>
 
               <input type="file" accept="image/*"
-                onChange={(e) => handleCardImageChange(e, card.id, "image")} />
+                onChange={(e) => handleCardImageChange(e, card.id, "image", index)} />
               <p className='image-name'>Selected Image : {card.imageName}</p>
-
             </form>
-
             <div className='actions'>
+             
+              {card.id ? 
               <button onClick={() => handleDelete(card.id)}>Delete</button>
+              : <button onClick={()=>handleAddCard(card)}>Add </button>
+                }
             </div>
+
 
           </div>
         ))}
 
-        {addCard && (
-          <div className='admin-container add-card-inline'>
-
-            <h3>New Card</h3>
-
-            <form onSubmit={handleSubmit} className='form'>
-
-              <input type="file" accept="image/*"
-                onChange={(e) => handleFileChange(e, "logo", "logoName")} />
-
-              <input
-                type='text'
-                placeholder='Enter title'
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-
-              <input
-                type="text"
-                placeholder='Enter description'
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-
-                }
-              />
-
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-              />
-
-              <input type="file" accept="image/*"
-                onChange={(e) => handleFileChange(e, "image", "imageName")} />
-
-              <div className="inline-actions">
-                <button type="submit">
-                  Add
-                </button>
-
-              </div>
-
-            </form>
-          </div>
-        )}
+        
 
       </div>
 
